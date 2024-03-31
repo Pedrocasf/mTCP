@@ -33,7 +33,7 @@
 #include <dos.h>
 #include <i86.h>
 
-#include "Timer.h"
+#include "timer.h"
 
 
 // This code uses a lot of timers, and probably should use more.  I used

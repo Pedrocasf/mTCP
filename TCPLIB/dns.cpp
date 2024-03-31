@@ -38,6 +38,7 @@
 #include <conio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <cstring>
 #include <string.h>
 #include <time.h>
 #include <malloc.h>
@@ -89,7 +90,7 @@ int8_t Dns::find( const char *name ) {
   int8_t rc = -1;
 
   for ( uint8_t i=0; i < entries; i++ ) {
-    if ( stricmp( dnsTable[i].name, name ) == 0 ) {
+    if ( _stricmp( dnsTable[i].name, name ) == 0 ) {
       rc = i;
       break;
     }

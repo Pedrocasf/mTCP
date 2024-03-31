@@ -37,7 +37,6 @@
 
 
 // Load and check the configuration options first
-
 #include CFG_H
 #include "types.h"
 
@@ -59,7 +58,7 @@ static_assert( ARP_TIMEOUT <= 1000ul );
 
 // Continue with other includes
 
-#include "Eth.h"
+#include "eth.h"
 
 
 

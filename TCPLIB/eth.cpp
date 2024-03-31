@@ -36,7 +36,7 @@
 
 #include <stdio.h>
 
-#include "Eth.h"
+#include "eth.h"
 
 
 EthAddr_t const Eth::Eth_Broadcast = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };

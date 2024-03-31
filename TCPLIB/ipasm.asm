@@ -64,8 +64,6 @@ else
     endif
   endif
 endif
-
-
 .code
 
 
@@ -73,9 +71,9 @@ endif
 ; Generic checksum code.  Give it a starting address and a length and you get
 ; an IP style checksum back.  Not loop unrolled or anything fancy.
 
-public _ipchksum
+public ipchksum_
 
-_ipchksum proc
+ipchksum_ proc
 
   push     bp
   mov      bp,sp
@@ -118,7 +116,7 @@ _ipchksum proc
   pop      bp
   ret
 
-_ipchksum endp
+ipchksum_ endp
 
 
 

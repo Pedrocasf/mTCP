@@ -84,8 +84,8 @@ extern uint8_t releaseTimeslice( void );
 #pragma aux releaseTimeslice = \
   "mov ax,0x1680"              \
   "int 0x2f"                   \
-  modify [ax]                  \
-  value  [al];
+  __value                      \
+  __modify [__ax];
 
 
 // Globals that tell us if we should be making the sleep calls.

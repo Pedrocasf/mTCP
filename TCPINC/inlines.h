@@ -43,24 +43,24 @@
 //
 // Macros to convert from host byte order to/from network byte order.
 
-extern uint16_t htons( uint16_t );
+uint16_t htons( uint16_t dl );
 #pragma aux htons = \
-  "xchg al, ah"     \
-  parm [ax]         \
-  modify [ax]       \
-  value [ax];
+  "xchg al, ah",    \
+  __parm [__ax] 	  \
+  __value [__ax]	  \
+  __modify [__ax];
 
 #define ntohs( x ) htons( x )
 
 
 extern uint32_t htonl( uint32_t );
-#pragma aux htonl = \
-  "xchg al, ah"     \
-  "xchg bl, bh"     \
-  "xchg ax, bx"     \
-  parm [ax bx]      \
-  modify [ax bx]    \
-  value [ax bx];
+#pragma aux htonl =  \
+  "xchg al, ah"      \
+  "xchg bl, bh"      \
+  "xchg ax, bx"      \
+  __parm [__ax __bx] \
+  __value [__ax __bx]\
+  __modify [__ax __bx];
 
 #define ntohl( x ) htonl( x )
 
@@ -78,8 +78,8 @@ extern uint16_t dosVersion( void );
 #pragma aux dosVersion = \
   "mov ah,0x30"          \
   "int 0x21"             \
-  modify [ax]            \
-  value [ax];
+  __value [__ax]         \
+  __modify [__ax];
 
 
 // Returns number of 16 byte paragraphs available.  So multiply the
@@ -94,9 +94,8 @@ extern uint16_t getFreeDOSMemory( void );
   "mov ah, 48h"     \
   "int 21h"         \
   "clc"             \
-  modify [ax bx]    \
-  value [bx];
-
+  __value [__bx]    \
+  __modify [__ax __bx];
 
 // Calling the runtime to do a stat( ) call brings in a lot of new code.
 // Use a DOS interrupt directly to avoid that bloat.
@@ -113,15 +112,15 @@ extern uint16_t getFreeDOSMemory( void );
 // Return 0 if good and attributes in attrs, otherwise return 1.
 // Does not like it if the name ends in a backslash.
 
-extern uint8_t getFileAttributes( const char far * name, uint16_t *attrs );
+extern uint8_t getFileAttributes( const char * name, uint16_t *attrs );
 #pragma aux getFileAttributes = \
   "mov ax, 4300h"               \
   "int 21h"                     \
   "lahf"                        \
   "and ah, 1h"                  \
   "mov es:bx, cx"               \
-  parm [ds dx] [es bx]          \
-  value [ah];
+  __parm [__ds __dx] [__es __bx]\
+  __value [__ah];
 
 
 
@@ -147,8 +146,8 @@ extern uint8_t getEgaMemSize( void );
   "mov bl, 10h"             \
   "int 10h"                 \
   "pop bp"                  \
-  modify [bh bl ch cl ah]   \
-  value [ bl ]
+  __value [__bl]            \
+  __modify [__bh __bl __ch __cl __ah];
 
 
 extern void turnOffEgaBlink( void );
@@ -166,8 +165,8 @@ extern void setVideoMode( uint8_t );
   "mov ah, 0"  \
   "int 10h"    \
   "pop bp"     \
-  parm [al]    \
-  modify [ax];
+  __parm [__al]\
+  __modify [__ax];
 
 
 // If you pass a 0 to lines the screen gets cleared.
@@ -179,8 +178,8 @@ extern void scrollScreen( uint8_t lines, uint8_t hiRow, uint8_t hiCol, uint8_t l
   "mov bh, 7h"          \
   "int 10h"             \
   "pop bp"              \
-  parm [al] [ch] [cl] [dh] [dl] \
-  modify [ah bh];
+  __parm [__al] [__ch] [__cl] [__dh] [__dl]\
+  __modify [__ah __bh];
 
 
 extern void writeChar( uint8_t col, uint8_t row, uint8_t ch, uint8_t attr );
@@ -198,8 +197,8 @@ extern void writeChar( uint8_t col, uint8_t row, uint8_t ch, uint8_t attr );
   "mov cx, 1h"       \
   "int 10h"          \
   "pop bp"           \
-  parm [dl] [dh] [al] [bl]    \
-  modify [ax bx cx dx];
+  __parm [__dl] [__dh] [__al] [__bl]\
+  __modify [__ax __bx __cx __dx];
 
 
 
@@ -210,8 +209,8 @@ extern unsigned char wherex( void );
   "mov bh, 0h"       \
   "int 10h"          \
   "pop bp"           \
-  modify [ ax bx cx dx ] \
-  value [ dl ];
+  __value [__dl]     \
+  __modify [ __ax __bx __cx __dx ];
 
 
 extern unsigned char wherey( void );
@@ -221,19 +220,19 @@ extern unsigned char wherey( void );
   "mov bh, 0h"       \
   "int 10h"          \
   "pop bp"           \
-  modify [ ax bx cx dx ] \
-  value [ dh ];
+  __value [__dh]     \
+  __modify [ __ax __bx __cx __dx ];
 
 
 extern void gotoxy( unsigned char col, unsigned char row );
-#pragma aux gotoxy = \
-  "push bp"          \
-  "mov ah, 2h"       \
-  "mov bh, 0h"       \
-  "int 10h"          \ 
-  "pop bp"           \
-  parm [dl] [dh]     \
-  modify [ax bh dx];
+#pragma aux gotoxy =  \
+  "push bp"           \
+  "mov ah, 2h"        \
+  "mov bh, 0h"        \
+  "int 10h"           \
+  "pop bp"            \
+  __parm [__dl] [__dh]\
+  __modify [__ax __bh __dx];
 
 
 extern void setBlockCursor( void );
@@ -243,7 +242,7 @@ extern void setBlockCursor( void );
   "mov cx, 0x000Fh" \
   "int 10h"         \
   "pop bp"          \
-  modify [ah cx];
+  __modify [__ah __cx];
 
 
 extern void hideCursor( void );
@@ -253,7 +252,7 @@ extern void hideCursor( void );
   "mov cx, 0x202Fh" \
   "int 10h"         \
   "pop bp"          \
-  modify [ah cx];
+  __modify [__ah __cx];
 
 
 // Generic video interrupt call that allows for two parameters (AX and BX)
@@ -263,8 +262,8 @@ extern uint16_t videoInt( uint16_t, uint16_t );
   "push bp"      \
   "int 10h"      \
   "pop bp"       \
-  parm [ax] [bx] \
-  value [ax];
+  __parm [__ax] [__bx]\
+  __value [__ax];
 
 
 // writeCharWithoutSnow
@@ -288,8 +287,8 @@ extern void writeCharWithoutSnow( uint16_t base, uint16_t off, uint16_t c );
   "stosw"                    \
   "sti"                      \
   "pop es"                   \
-  parm [ax] [di] [bx]            \
-  modify [dx];
+  __parm [__ax] [__di] [__bx]\
+  __modify [__dx];
 
 
 extern void waitForCGARetraceLong( void );
@@ -301,7 +300,7 @@ extern void waitForCGARetraceLong( void );
   "retrace: in al,dx"        \
   "and al, 8"                \
   "jz retrace"               \
-  modify [dx al];
+  __modify [__dx __al];
 
 
 
@@ -328,15 +327,15 @@ extern bool biosIsKeyReady( void );
   "jmp end"            \
   "nokey: mov bh, 0x0" \
   "end:"               \
-  modify [ax bh]       \
-  value [bh];
+  __value  [__bh]              \
+  __modify [__ax __bh];
 
 extern uint16_t biosKeyRead( void );
 #pragma aux biosKeyRead = \
   "mov ah, 0x0"        \
   "int 0x16"           \
-  modify [ax]          \
-  value [ax];
+  __value [__ax]       \
+  __modify [__ax];
 
 
 
@@ -358,8 +357,8 @@ extern void fillUsingWord( void far * target, uint16_t fillWord, uint16_t len );
   "rep stosw"  \
   "pop di"     \
   "pop es"     \
-  modify [ax]  \
-  parm [dx bx] [ax] [cx]
+  __parm [__dx __bx] [__ax] [__cx]\
+  __modify [__ax];
 
 #endif
 

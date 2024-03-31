@@ -240,10 +240,10 @@ void Buffer_free( const uint8_t *buffer ) {
   // This has to be protected because the packet driver can interrupt
   // at any time to grab a packet from the free list.
 
-  disable_ints( );
+  disable_ints();
   Buffer_fs[ Buffer_fs_index ] = (uint8_t *)buffer;
   Buffer_fs_index++;
-  enable_ints( );
+  enable_ints();
 }
 
 
