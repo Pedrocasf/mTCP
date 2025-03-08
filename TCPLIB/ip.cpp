@@ -1,7 +1,7 @@
 /*
 
    mTCP Ip.cpp
-   Copyright (C) 2005-2023 Michael B. Brutman (mbbrutman@gmail.com)
+   Copyright (C) 2005-2025 Michael B. Brutman (mbbrutman@gmail.com)
    mTCP web page: http://www.brutman.com/mTCP
 
 
@@ -246,7 +246,7 @@ uint16_t Ip::pseudoChecksum( const IpAddr_t src, const IpAddr_t target,
 // zero if necessary, making the code simpler.  This version of the code
 // doesn't require that anymore.
 
-extern "C" uint16_t ipchksum( uint16_t *data_p, uint16_t len ) {
+extern "C" uint16_t ipchksum( uint16_t far *data_p, uint16_t len ) {
 
   // Create our own FAR version of the data pointer so that we can
   // normalize it and use it no matter what the memory model is.
@@ -254,7 +254,7 @@ extern "C" uint16_t ipchksum( uint16_t *data_p, uint16_t len ) {
   // Don't normalize if we are not near the end of the segment because
   // the division part is expensive.
 
-  uint16_t *data = data_p;
+  uint16_t far *data = data_p;
 
   if ( FP_OFF(data) > 0xFA00 ) {
 
@@ -476,40 +476,6 @@ extern "C" uint16_t ip_p_chksum( IpAddr_t src, IpAddr_t target,
 
 }
 #endif
-extern "C" uint16_t ipchksum( uint16_t *, uint16_t );
-#pragma aux ipchksum = \
-"push     bp" \
-"mov      bp,sp"\
-"push     ds"\
-"push     si"\
-"mov      dx, [bp+6+4]   "\
-"mov      cx, dx         "\
-"shr      cx, 1          "\
-"xor      bx, bx         "\
-"cld                     "\
-"lds      si, [bp+6]     "\
-"clc                     "\
-"top1:"\
-"  lodsw"\
-"  adc    bx, ax"\
-"  loop   top1"\
-"adc      bx, 0"\
-"and      dx, 1"\
-"jz       notodd1"\
-"lodsw"\
-"xor      ah, ah"\
-"add      bx, ax"\
-"adc      bx, 0"\
-"notodd1:"\
-"not bx                  "\
-"mov      ax, bx         "\
-"pop      si"\
-"pop      ds"\
-"pop      bp"\
-"ret" \
-__parm [__dx __ax] [__bx] \
-__value [__ax]       \
-__modify [__ax __dx __bx __cx];
 
 
 
@@ -676,7 +642,7 @@ int Ip::initForReassembly( void ) {
 
   uint16_t tmpSize = sizeof( BigPacket_t ) * IP_MAX_FRAG_PACKETS;
 
-  uint8_t *tmp = (uint8_t *)malloc( tmpSize );
+  uint8_t *tmp = (uint8_t *)mTCP_malloc( tmpSize, "LIB_IP_Frag_bufs" );
   if ( tmp == NULL ) {
     return -1;
   }

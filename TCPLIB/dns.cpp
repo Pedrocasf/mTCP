@@ -1,7 +1,7 @@
 /*
 
    mTCP Dns.cpp
-   Copyright (C) 2008-2023 Michael B. Brutman (mbbrutman@gmail.com)
+   Copyright (C) 2008-2025 Michael B. Brutman (mbbrutman@gmail.com)
    mTCP web page: http://www.brutman.com/mTCP
 
 
@@ -38,10 +38,8 @@
 #include <conio.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <cstring>
 #include <string.h>
 #include <time.h>
-#include <malloc.h>
 
 #include "dns.h"
 #include "timer.h"
@@ -90,7 +88,7 @@ int8_t Dns::find( const char *name ) {
   int8_t rc = -1;
 
   for ( uint8_t i=0; i < entries; i++ ) {
-    if ( _stricmp( dnsTable[i].name, name ) == 0 ) {
+    if ( stricmp( dnsTable[i].name, name ) == 0 ) {
       rc = i;
       break;
     }
@@ -282,14 +280,10 @@ int8_t Dns::resolve( const char *serverName, IpAddr_t target, uint8_t sendReq ) 
     }
   }
 
-  if ( Ip::isSame(NameServer, IpInvalid) ) {
-    return -2;  // No nameserver set.
-  }
 
   if ( len >= DNS_MAX_NAME_LEN-1 ) {
     return -1;  // Name too long.
   }
-
 
 
   // They passed in a name, not an IP address.  Is the name in our cache?
@@ -347,6 +341,11 @@ int8_t Dns::resolve( const char *serverName, IpAddr_t target, uint8_t sendReq ) 
   if ( target[0] != 0 ) {
     addOrUpdate( serverName, target );
     return 0;
+  }
+
+
+  if ( Ip::isSame(NameServer, IpInvalid) ) {
+    return -2;  // No nameserver set.
   }
 
 

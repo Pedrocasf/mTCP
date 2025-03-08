@@ -1,7 +1,7 @@
 /*
 
    mTCP Timer.cpp
-   Copyright (C) 2008-2023 Michael B. Brutman (mbbrutman@gmail.com)
+   Copyright (C) 2008-2025 Michael B. Brutman (mbbrutman@gmail.com)
    mTCP web page: http://www.brutman.com/mTCP
 
 
@@ -33,7 +33,7 @@
 #include <dos.h>
 #include <i86.h>
 
-#include "timer.h"
+#include "Timer.h"
 
 
 // This code uses a lot of timers, and probably should use more.  I used

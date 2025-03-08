@@ -1,7 +1,7 @@
 /*
 
    mTCP Eth.cpp
-   Copyright (C) 2005-2023 Michael B. Brutman (mbbrutman@gmail.com)
+   Copyright (C) 2005-2025 Michael B. Brutman (mbbrutman@gmail.com)
    mTCP web page: http://www.brutman.com/mTCP
 
 
@@ -36,7 +36,7 @@
 
 #include <stdio.h>
 
-#include "eth.h"
+#include "Eth.h"
 
 
 EthAddr_t const Eth::Eth_Broadcast = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };

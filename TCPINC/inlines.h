@@ -1,7 +1,7 @@
 /*
 
    mTCP Inlines.H
-   Copyright (C) 2006-2023 Michael B. Brutman (mbbrutman@gmail.com)
+   Copyright (C) 2006-2025 Michael B. Brutman (mbbrutman@gmail.com)
    mTCP web page: http://www.brutman.com/mTCP
 
 
@@ -43,24 +43,24 @@
 //
 // Macros to convert from host byte order to/from network byte order.
 
-uint16_t htons( uint16_t dl );
+extern uint16_t htons( uint16_t );
 #pragma aux htons = \
-  "xchg al, ah",    \
-  __parm [__ax] 	  \
-  __value [__ax]	  \
-  __modify [__ax];
+  "xchg al, ah"     \
+  parm [ax]         \
+  modify [ax]       \
+  value [ax];
 
 #define ntohs( x ) htons( x )
 
 
 extern uint32_t htonl( uint32_t );
-#pragma aux htonl =  \
-  "xchg al, ah"      \
-  "xchg bl, bh"      \
-  "xchg ax, bx"      \
-  __parm [__ax __bx] \
-  __value [__ax __bx]\
-  __modify [__ax __bx];
+#pragma aux htonl = \
+  "xchg al, ah"     \
+  "xchg bl, bh"     \
+  "xchg ax, bx"     \
+  parm [ax bx]      \
+  modify [ax bx]    \
+  value [ax bx];
 
 #define ntohl( x ) htonl( x )
 
@@ -76,10 +76,14 @@ extern uint32_t htonl( uint32_t );
 
 extern uint16_t dosVersion( void );
 #pragma aux dosVersion = \
+  "push bx"              \
+  "push cx"              \
   "mov ah,0x30"          \
   "int 0x21"             \
-  __value [__ax]         \
-  __modify [__ax];
+  "pop cx"               \
+  "pop bx"               \
+  modify [ax]            \
+  value [ax];
 
 
 // Returns number of 16 byte paragraphs available.  So multiply the
@@ -94,8 +98,9 @@ extern uint16_t getFreeDOSMemory( void );
   "mov ah, 48h"     \
   "int 21h"         \
   "clc"             \
-  __value [__bx]    \
-  __modify [__ax __bx];
+  modify [ax bx]    \
+  value [bx];
+
 
 // Calling the runtime to do a stat( ) call brings in a lot of new code.
 // Use a DOS interrupt directly to avoid that bloat.
@@ -112,15 +117,15 @@ extern uint16_t getFreeDOSMemory( void );
 // Return 0 if good and attributes in attrs, otherwise return 1.
 // Does not like it if the name ends in a backslash.
 
-extern uint8_t getFileAttributes( const char * name, uint16_t *attrs );
+extern uint8_t getFileAttributes( const char far * name, uint16_t *attrs );
 #pragma aux getFileAttributes = \
   "mov ax, 4300h"               \
   "int 21h"                     \
   "lahf"                        \
   "and ah, 1h"                  \
   "mov es:bx, cx"               \
-  __parm [__ds __dx] [__es __bx]\
-  __value [__ah];
+  parm [ds dx] [es bx]          \
+  value [ah];
 
 
 
@@ -146,8 +151,8 @@ extern uint8_t getEgaMemSize( void );
   "mov bl, 10h"             \
   "int 10h"                 \
   "pop bp"                  \
-  __value [__bl]            \
-  __modify [__bh __bl __ch __cl __ah];
+  modify [bh bl ch cl ah]   \
+  value [ bl ]
 
 
 extern void turnOffEgaBlink( void );
@@ -165,8 +170,8 @@ extern void setVideoMode( uint8_t );
   "mov ah, 0"  \
   "int 10h"    \
   "pop bp"     \
-  __parm [__al]\
-  __modify [__ax];
+  parm [al]    \
+  modify [ax];
 
 
 // If you pass a 0 to lines the screen gets cleared.
@@ -178,8 +183,8 @@ extern void scrollScreen( uint8_t lines, uint8_t hiRow, uint8_t hiCol, uint8_t l
   "mov bh, 7h"          \
   "int 10h"             \
   "pop bp"              \
-  __parm [__al] [__ch] [__cl] [__dh] [__dl]\
-  __modify [__ah __bh];
+  parm [al] [ch] [cl] [dh] [dl] \
+  modify [ah bh];
 
 
 extern void writeChar( uint8_t col, uint8_t row, uint8_t ch, uint8_t attr );
@@ -197,8 +202,8 @@ extern void writeChar( uint8_t col, uint8_t row, uint8_t ch, uint8_t attr );
   "mov cx, 1h"       \
   "int 10h"          \
   "pop bp"           \
-  __parm [__dl] [__dh] [__al] [__bl]\
-  __modify [__ax __bx __cx __dx];
+  parm [dl] [dh] [al] [bl]    \
+  modify [ax bx cx dx];
 
 
 
@@ -209,8 +214,8 @@ extern unsigned char wherex( void );
   "mov bh, 0h"       \
   "int 10h"          \
   "pop bp"           \
-  __value [__dl]     \
-  __modify [ __ax __bx __cx __dx ];
+  modify [ ax bx cx dx ] \
+  value [ dl ];
 
 
 extern unsigned char wherey( void );
@@ -220,20 +225,44 @@ extern unsigned char wherey( void );
   "mov bh, 0h"       \
   "int 10h"          \
   "pop bp"           \
-  __value [__dh]     \
-  __modify [ __ax __bx __cx __dx ];
+  modify [ ax bx cx dx ] \
+  value [ dh ];
 
 
 extern void gotoxy( unsigned char col, unsigned char row );
-#pragma aux gotoxy =  \
-  "push bp"           \
-  "mov ah, 2h"        \
-  "mov bh, 0h"        \
-  "int 10h"           \
-  "pop bp"            \
-  __parm [__dl] [__dh]\
-  __modify [__ax __bh __dx];
+#pragma aux gotoxy = \
+  "push bp"          \
+  "mov ah, 2h"       \
+  "mov bh, 0h"       \
+  "int 10h"          \ 
+  "pop bp"           \
+  parm [dl] [dh]     \
+  modify [ax bh dx];
 
+extern uint16_t readCursorShape( void );
+#pragma aux readCursorShape = \
+  "push ax"                   \
+  "push bx"                   \
+  "push dx"                   \
+  "push bp"                   \
+  "mov  ah, 0x3"              \
+  "mov  bx, 0"                \
+  "int  10h"                  \
+  "pop  bp"                   \
+  "pop  dx"                   \
+  "pop  bx"                   \
+  "pop  ax"                   \
+  value [cx];
+
+extern void setCursorShape( uint16_t );
+#pragma aux setCursorShape = \
+  "push ax"                  \
+  "push bp"                  \
+  "mov  ah, 0x1"             \
+  "int  10h"                 \
+  "pop  bp"                  \
+  "pop  ax"                  \
+  parm [cx];
 
 extern void setBlockCursor( void );
 #pragma aux setBlockCursor = \
@@ -242,7 +271,7 @@ extern void setBlockCursor( void );
   "mov cx, 0x000Fh" \
   "int 10h"         \
   "pop bp"          \
-  __modify [__ah __cx];
+  modify [ah cx];
 
 
 extern void hideCursor( void );
@@ -252,7 +281,7 @@ extern void hideCursor( void );
   "mov cx, 0x202Fh" \
   "int 10h"         \
   "pop bp"          \
-  __modify [__ah __cx];
+  modify [ah cx];
 
 
 // Generic video interrupt call that allows for two parameters (AX and BX)
@@ -262,8 +291,8 @@ extern uint16_t videoInt( uint16_t, uint16_t );
   "push bp"      \
   "int 10h"      \
   "pop bp"       \
-  __parm [__ax] [__bx]\
-  __value [__ax];
+  parm [ax] [bx] \
+  value [ax];
 
 
 // writeCharWithoutSnow
@@ -287,8 +316,8 @@ extern void writeCharWithoutSnow( uint16_t base, uint16_t off, uint16_t c );
   "stosw"                    \
   "sti"                      \
   "pop es"                   \
-  __parm [__ax] [__di] [__bx]\
-  __modify [__dx];
+  parm [ax] [di] [bx]            \
+  modify [dx];
 
 
 extern void waitForCGARetraceLong( void );
@@ -300,7 +329,7 @@ extern void waitForCGARetraceLong( void );
   "retrace: in al,dx"        \
   "and al, 8"                \
   "jz retrace"               \
-  __modify [__dx __al];
+  modify [dx al];
 
 
 
@@ -327,15 +356,15 @@ extern bool biosIsKeyReady( void );
   "jmp end"            \
   "nokey: mov bh, 0x0" \
   "end:"               \
-  __value  [__bh]              \
-  __modify [__ax __bh];
+  modify [ax bh]       \
+  value [bh];
 
 extern uint16_t biosKeyRead( void );
 #pragma aux biosKeyRead = \
   "mov ah, 0x0"        \
   "int 0x16"           \
-  __value [__ax]       \
-  __modify [__ax];
+  modify [ax]          \
+  value [ax];
 
 
 
@@ -357,8 +386,8 @@ extern void fillUsingWord( void far * target, uint16_t fillWord, uint16_t len );
   "rep stosw"  \
   "pop di"     \
   "pop es"     \
-  __parm [__dx __bx] [__ax] [__cx]\
-  __modify [__ax];
+  modify [ax]  \
+  parm [dx bx] [ax] [cx]
 
 #endif
 

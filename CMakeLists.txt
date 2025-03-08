@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.26)
 
 project(mTCP VERSION 0.1.0 LANGUAGES C CXX ASM)
 set(CMAKE_C_STANDARD 99)

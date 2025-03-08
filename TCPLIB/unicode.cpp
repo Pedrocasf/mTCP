@@ -1,7 +1,7 @@
 /*
 
    mTCP Unicode.CPP
-   Copyright (C) 2023 Michael B. Brutman (mbbrutman@gmail.com)
+   Copyright (C) 2023-2025 Michael B. Brutman (mbbrutman@gmail.com)
 
    This file is part of mTCP.
 
@@ -251,8 +251,8 @@ uint8_t Unicode::encodeUTF8( unicode_cp_t cp, uint8_t *buffer ) {
 
 // To compile ...
 //
-// Watcom: wcl -0 -s -i=../INCLUDE UNICODE.CPP -DTEST_UNICODE
-// g++: g++ -I ../INCLUDE UNICODE.CPP -DTEST_UNICODE
+// Watcom: wcl -0 -s -i=../INCLUDE unicode.cpp -DTEST_UNICODE
+// g++: g++ -I ../INCLUDE unicode.cpp -DTEST_UNICODE
 // 
 //
 // To test:
